@@ -1,6 +1,8 @@
 package Core;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 public class Enchant {
 
@@ -32,7 +33,7 @@ public class Enchant {
 
 			@Override
 			public void run() {
-				applyEnchant();
+				applyEnchants();
 			}
 			
 		}, 20 * 3);
@@ -50,7 +51,7 @@ public class Enchant {
 		hg.teleport(item.getWorld(), item.getLocation().getX(), item.getLocation().getY() + 1, item.getLocation().getZ());
 	}
 	
-	public void applyEnchant() {
+	public void applyEnchants() {
 		hg.appendTextLine(ChatColor.GREEN + "");
 		List<Enchantment> enchants = Survival.validEnchantments.get(itemstack.getType());
 		// Determine size of all possible enchants
@@ -59,19 +60,41 @@ public class Enchant {
 		// Determine chances on 1 enchant, 2 enchants, 3 enchants, etc via exponential equation
 		double[] chances = new double[num];
 		for(int i = 1; i <= num; i++) {
-			double chance = Math.pow(2, i * (1 / num));	
+			double chance = 0.0158114 * Math.pow(56.5047, (double)i * (1 / (double)num));	
 			chances[i - 1] = chance;
 		}
+		Bukkit.broadcastMessage("Chances: " + chances);
 		
 		// Generate random number
 		double randNum = Math.random();
+		Bukkit.broadcastMessage("random number: " + randNum);
+		
+		int toAdd = 1;
 		
 		// Since the smallest numbers are generated first, we want to start at the high end of the array.
-		for(int i = chances.length - 1; i >= 0; i--) {
+		for(int i = 0; i <= chances.length - 1; i++) {
+			Bukkit.broadcastMessage("Checking " + randNum + " >= " + chances[i]);
 			if(randNum >= chances[i]) {
-				
+				Bukkit.broadcastMessage("true");
+				toAdd = chances.length - i;
 				break;
 			}
+		}
+		Bukkit.broadcastMessage("toAdd: " + toAdd);
+		
+		List<Enchantment> adding = new ArrayList<Enchantment>();
+		
+		// Apply enchants.
+		for(int i = 0; i < toAdd; i++) {
+			int random = new Random().nextInt(enchants.size());
+			adding.add(enchants.get(random));
+			Bukkit.broadcastMessage("adding " + enchants.get(random).getName());
+			enchants.remove(random);
+		}
+		
+		for(Enchantment ench : adding) {
+			itemstack.addUnsafeEnchantment(ench, ench.getMaxLevel());
+			hg.appendTextLine(ChatColor.YELLOW + Survival.getFormattedName(ench.getName()));
 		}
 	}
 	
