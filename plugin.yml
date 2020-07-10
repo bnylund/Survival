@@ -1,0 +1,19 @@
+main: Core.Survival
+name: Survival
+version: '1.0'
+api-version: 1.13
+description: Minecraft Survival
+author: cheezyrl
+commands:
+    dungeon:
+        description: Lists dungeons
+        usage: /dungeon
+    shop:
+        description: Teleports to shop
+        usage: /shop
+    shopsetup:
+        description: Shop Setup
+        usage: /shopsetup
+    sregion:
+        description: Survival Regions
+        usage: /sregion
