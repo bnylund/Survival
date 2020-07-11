@@ -12,6 +12,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
@@ -29,6 +30,17 @@ public class Enchant {
 		hg = HologramsAPI.createHologram(Survival.pl, new Location(item.getWorld(), item.getLocation().getX(), item.getLocation().getY() + 1, item.getLocation().getZ()));
 		hg.appendTextLine(Survival.getFormattedName(itemstack.getType().toString()));
 		p = e.getPlayer();
+	}
+	
+	public void Start() {
+		BukkitTask bt = Bukkit.getScheduler().runTaskTimer(Survival.pl, new Runnable() {
+
+			@Override
+			public void run() {
+				updateHologramLocation();
+			}
+			
+		}, 0L, 1L);
 		Bukkit.getScheduler().runTaskLater(Survival.pl, new Runnable() {
 
 			@Override
@@ -36,22 +48,24 @@ public class Enchant {
 				applyEnchants();
 			}
 			
-		}, 20 * 3);
+		}, 20 * 5);
 		Bukkit.getScheduler().runTaskLater(Survival.pl, new Runnable() {
 
 			@Override
 			public void run() {
+				bt.cancel();
 				Finish();
 			}
 			
-		}, 20 * 6);
+		}, 20 * 9);
 	}
 	
-	public void updateHologramLocation() {
+	private void updateHologramLocation() {
 		hg.teleport(item.getWorld(), item.getLocation().getX(), item.getLocation().getY() + 1, item.getLocation().getZ());
 	}
 	
-	public void applyEnchants() {
+	@SuppressWarnings("deprecation")
+	private void applyEnchants() {
 		hg.appendTextLine(ChatColor.GREEN + "");
 		List<Enchantment> enchants = Survival.validEnchantments.get(itemstack.getType());
 		// Determine size of all possible enchants
@@ -63,24 +77,21 @@ public class Enchant {
 			double chance = 0.0158114 * Math.pow(56.5047, (double)i * (1 / (double)num));	
 			chances[i - 1] = chance;
 		}
-		Bukkit.broadcastMessage("Chances: " + chances);
 		
 		// Generate random number
 		double randNum = Math.random();
-		Bukkit.broadcastMessage("random number: " + randNum);
 		
 		int toAdd = 1;
 		
-		// Since the smallest numbers are generated first, we want to start at the high end of the array.
+		// chances[0] = 0.052566, chances[1] = 0.2456986
 		for(int i = 0; i <= chances.length - 1; i++) {
 			Bukkit.broadcastMessage("Checking " + randNum + " >= " + chances[i]);
-			if(randNum >= chances[i]) {
-				Bukkit.broadcastMessage("true");
+			if(randNum <= chances[i]) {
 				toAdd = chances.length - i;
+				Bukkit.broadcastMessage("true, adding " + toAdd);
 				break;
 			}
 		}
-		Bukkit.broadcastMessage("toAdd: " + toAdd);
 		
 		List<Enchantment> adding = new ArrayList<Enchantment>();
 		

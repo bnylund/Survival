@@ -24,6 +24,7 @@ public class EnchantmentListeners implements Listener {
 				e.getItemDrop().setGravity(false);
 				e.getItemDrop().setGlowing(true);
 				Enchant ench = new Enchant(e);
+				ench.Start();
 			}
 		}
 	}

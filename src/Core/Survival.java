@@ -1,10 +1,8 @@
 package Core;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -330,15 +328,30 @@ public class Survival extends JavaPlugin implements Listener {
 		merchants.clear();
 		
 		// Add merchants
-		
-		
-		// Blocks
-		
-		// Food
-		
-		// Enchantment Books
-		
-		// Dungeon keys?
+		reloadMerchant("Blocks");
+		reloadMerchant("Food");
+		reloadMerchant("Enchantment Books");
+		reloadMerchant("Dungeon Keys");
+	}
+	
+	public static ClickableInventory getInventory(String merchant) {
+		// Create inventories for blocks, food, enchantments, dungeon keys
+		return new ClickableInventory(9, "");
+	}
+	
+	public static void reloadMerchant(String name) {
+		for(Merchant mer : merchants) {
+			if(mer.getName().equals(name)) {
+				mer.Despawn();
+			}
+		}
+		merchants.removeIf(x -> x.getName().equals(name));
+		if(pl.getConfig().contains("shop." + name)) {
+			Location loc = new Location(Bukkit.getWorld(pl.getConfig().getString("shop." + name + ".npc.world")), pl.getConfig().getDouble("shop." + name + ".npc.x"), pl.getConfig().getDouble("shop." + name + ".npc.y"), pl.getConfig().getDouble("shop." + name + ".npc.z"), (float)pl.getConfig().getDouble("shop." + name + ".npc.yaw"), (float)pl.getConfig().getDouble("shop." + name + ".npc.pitch"));
+			Merchant mc = new Merchant(name, loc, getInventory(name));
+			mc.Spawn();
+			merchants.add(mc);
+		}
 	}
 
 	public static String getFormattedName(String input) {
